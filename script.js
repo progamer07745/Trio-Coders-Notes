@@ -60,7 +60,6 @@ window.handleLogin = () => {
     // تحديد مدة الجلسة بناءً على اختيار المستخدم
     // SESSION يمسح الدخول لو قفل المتصفح | LOCAL يفضل فاكره حتى لو قفل الجهاز
     const persistence = rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
-
     auth.setPersistence(persistence)
         .then(() => {
             return auth.signInWithEmailAndPassword(email, pass);
@@ -76,11 +75,15 @@ window.handleLogin = () => {
 };
 
 window.handleLogout = () => {
+    // قبل ما يخرج، بنرجع الـ Persistence للوضع العادي عشان ميفتكرش حد
     auth.signOut().then(() => {
-        showToast("Logged Out", "success");
-        // ممكن تمسح الفورم كمان بالمرة عشان الخصوصية
-        document.getElementById("emailInput").value = "";
-        document.getElementById("passInput").value = "";
+        showToast("Logged Out Successfully", "success");
+        // تنظيف الفورم
+        if (document.getElementById("emailInput")) document.getElementById("emailInput").value = "";
+        if (document.getElementById("passInput")) document.getElementById("passInput").value = "";
+
+        // دي أهم حتة: بنجبره ينسى الجلسة تماماً
+        location.reload(); // ريفرش بسيط يضمن إن كل الـ States اتصفرت
     });
 };
 
