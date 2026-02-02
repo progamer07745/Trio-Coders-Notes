@@ -6,58 +6,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Group Notes</title>
     <link rel="stylesheet" href="style.css" />
-
 </head>
 
 <body>
-    <div class="container">
-        <h1>Trio Coders Notes</h1>
+    <div id="loginSection">
+        <center>
+            <h1 class="main-title">Login</h1>
+            <form onsubmit="event.preventDefault(); handleLogin();">
+                <div>
+                    <label for="emailInput">Email Address:</label>
+                    <input type="email" id="emailInput" required>
+                </div>
+                <br>
+                <div>
+                    <label for="passInput">Password:</label>
+                    <input type="password" id="passInput" required>
+                </div>
+                <br>
+                <div class="remember-box">
+                    <label>
+                        <input type="checkbox" id="rememberMeCheckbox"> Remember Me
+                    </label>
+                </div>
+                <br>
+                <button type="submit">Login</button>
+                <br><br>
+            </form>
+        </center>
+    </div>
 
-        <form id="noteForm">
-            <div class="stats-container">
-                <div class="stat-item" style="color: #4caf50">
-                    Completed: <span id="completed-tasks">0</span>
-                </div>
-                <div class="stat-item" style="color: #ffc107">
-                    Pending: <span id="pending-tasks">0</span>
-                </div>
-                <div class="stat-item">
-                    Total: <span id="total-tasks">0</span>
-                </div>
-            </div>
-            <div id="form-row">
-                <input type="text" id="yourName" placeholder="Name" />
-                <!-- <span id="nameError" style="color : #ff4d4d; font-size: 12px; position: absolute; top: -20px; right: 0; display: none;">Enter Valid Name!!</span> -->
-                <label for="noteField">Field:</label>
-                <select id="noteField">
-                    <option value="YouTube">YouTube</option>
-                    <option value="Designs">Designs</option>
-                    <option value="Reels">Reels</option>
-                    <option value="Programming">Programming</option>
-                </select>
-            </div>
-            <br />
-            <input type="text" id="noteIdea" placeholder="Idea" />
-            <br />
-            <textarea id="noteDesc" placeholder="Description"></textarea>
-            <button type="submit">ADD</button>
-        </form>
+    <div id="mainDashboard" style="display: none;">
+        <button onclick="handleLogout()"
+            style="position: absolute; top: 20px; right: 20px; background: #e53935; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">Logout</button>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Idea</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th colspan="2" text-align="center">Status</th>
-                </tr>
-            </thead>
-            <tbody id="table-body-YouTube" data-field="YouTube"></tbody>
-            <tbody id="table-body-Designs" data-field="Designs"></tbody>
-            <tbody id="table-body-Reels" data-field="Reels"></tbody>
-            <tbody id="table-body-Programming" data-field="Programming"></tbody>
-        </table>
+        <div class="container">
+            <h1>Trio Coders Notes</h1>
+
+            <form id="noteForm">
+                <div class="stats-container">
+                    <div class="stat-item" style="color: #4caf50">
+                        Completed: <span id="completed-tasks">0</span>
+                    </div>
+                    <div class="stat-item" style="color: #ffc107">
+                        Pending: <span id="pending-tasks">0</span>
+                    </div>
+                    <div class="stat-item">
+                        Total: <span id="total-tasks">0</span>
+                    </div>
+                </div>
+                <div id="form-row">
+                    <input type="text" id="yourName" placeholder="Name" />
+                    <label for="noteField">Field:</label>
+                    <select id="noteField">
+                        <option value="YouTube">YouTube</option>
+                        <option value="Designs">Designs</option>
+                        <option value="Reels">Reels</option>
+                        <option value="Programming">Programming</option>
+                    </select>
+                </div>
+                <br />
+                <input type="text" id="noteIdea" placeholder="Idea" />
+                <br />
+                <textarea id="noteDesc" placeholder="Description"></textarea>
+                <button type="submit">ADD</button>
+            </form>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Idea</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th colspan="2" style="text-align: center">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body-YouTube" data-field="YouTube"></tbody>
+                <tbody id="table-body-Designs" data-field="Designs"></tbody>
+                <tbody id="table-body-Reels" data-field="Reels"></tbody>
+                <tbody id="table-body-Programming" data-field="Programming"></tbody>
+            </table>
+        </div>
     </div>
 
     <div id="deleteModal" class="modal">
@@ -69,9 +98,8 @@
         </div>
     </div>
 
-    <!-- <div id="toast"></div> -->
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="script.js"></script>
 </body>
