@@ -105,7 +105,7 @@ notesRef.limitToLast(1).on('child_added', (snapshot) => {
 
     // الإشعار يشتغل فقط لو حد تاني هو اللي ضاف
     if (currentUser && note.createdBy !== currentUser.email) {
-        
+
         // 1. تشغيل الصوت (تم تغيير الرابط لواحد أسرع)
         const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         notificationSound.play().catch(error => {
@@ -196,7 +196,14 @@ document.getElementById("noteForm").addEventListener("submit", function (e) {
         Title: document.getElementById("noteIdea").value.trim(),
         Description: document.getElementById("noteDesc").value.trim(),
         Field: document.getElementById("noteField").value,
-        DateTime: new Date().toLocaleString("en-GB"),
+        DateTime: new Date().toLocaleString("en-GB", {
+            hour12: false,
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }),
         progress: "Pending",
         createdBy: auth.currentUser.email
     };
@@ -266,3 +273,41 @@ function updateStats() {
     if (document.getElementById("pending-tasks")) document.getElementById("pending-tasks").innerText = pending;
     if (document.getElementById("completed-tasks")) document.getElementById("completed-tasks").innerText = completed;
 }
+
+
+// ==========================================
+// 6. نظام الخروج التلقائي (Auto Logout)
+// ==========================================
+
+let idleTimer;
+const INACTIVITY_TIME = 5 * 60 * 1000; // المدة بالملي ثانية (30 دقيقة)
+
+function resetIdleTimer() {
+    // لو المستخدم عمل أي حركة، بنصفر التايمر ونبدأ نعد من جديد
+    clearTimeout(idleTimer);
+
+    // بنبدأ التايمر لو المستخدم مسجل دخول بس
+    if (auth.currentUser) {
+        idleTimer = setTimeout(() => {
+            showToast("Logged out due to inactivity", "error");
+            handleLogout();
+        }, INACTIVITY_TIME);
+    }
+}
+
+// الأحداث اللي بنعتبرها "نشاط" من المستخدم
+window.onload = resetIdleTimer;
+window.onmousemove = resetIdleTimer;
+window.onmousedown = resetIdleTimer; // ضغطة ماوس
+window.ontouchstart = resetIdleTimer; // لمس الشاشة للموبايل
+window.onclick = resetIdleTimer;
+window.onkeydown = resetIdleTimer; // كتابة بالكيبورد
+
+// تنظيف التايمر تماماً لو خرج يدوي
+auth.onAuthStateChanged((user) => {
+    if (!user) {
+        clearTimeout(idleTimer);
+    } else {
+        resetIdleTimer();
+    }
+});
