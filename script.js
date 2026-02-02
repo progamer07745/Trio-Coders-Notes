@@ -1,4 +1,4 @@
-// 1. إعداد المكتبة (استخدمت لك نفس قاعدة بيانات الخطوبة للتجربة)
+// 1. إعداد المكتبة
 const firebaseConfig = {
     databaseURL: "https://congratulations-demo-default-rtdb.firebaseio.com/"
 };
@@ -68,7 +68,7 @@ function createRow(id, note) {
             <button class="delete-btn">Delete</button>
         </td>`;
 
-    // تحديث الحالة في السيرفر فوراً عند التغيير
+    // تحديث الحالة عند التغيير
     row.querySelector(".status-select").addEventListener("change", (e) => {
         notesRef.child(id).update({
             progress: e.target.value
@@ -78,43 +78,62 @@ function createRow(id, note) {
     return row;
 }
 
-// --- إضافة نوتة جديدة ---
+// --- إضافة نوتة جديدة (التعديل المطلوب هنا) ---
 noteForm.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    // جلب العناصر
     const nameInput = document.getElementById("yourName");
     const titleInput = document.getElementById("noteIdea");
     const descInput = document.getElementById("noteDesc");
     const fieldInput = document.getElementById("noteField");
 
+    // التحقق من الأسماء المسموحة
     const allowedNames = ["Omar", "Ahmed", "Mohamed"];
-    const nameValue = nameInput.value.trim();
+    const nameValueRaw = nameInput.value.trim();
+    const nameValue = nameValueRaw.charAt(0).toUpperCase() + nameValueRaw.slice(1).toLowerCase();
 
-    if (!nameValue || !titleInput.value) {
-        showToast("اكتب اسمك والعنوان يا هندسة!");
+    if (!allowedNames.includes(nameValue)) {
+        nameInput.classList.add("input-error");
+        showToast("Enter Valid Name !!! (Trio Coders Only)");
         return;
     }
 
+    if (!titleInput.value.trim()) {
+        titleInput.classList.add("input-error");
+        return;
+    }
+
+    // تجهيز البيانات
     const noteData = {
         Name: nameValue,
         Title: titleInput.value.trim(),
         Description: descInput.value.trim(),
         Field: fieldInput.value,
-        DateTime: new Date().toLocaleString("ar-EG"),
+        DateTime: new Date().toLocaleString("en-GB", {
+            hour: "numeric",
+            minute: "numeric",
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        }),
         progress: "Pending",
     };
 
-    // دفع البيانات لـ Firebase
-    notesRef.push(noteData).then(() => {
-        noteForm.reset();
-        showToast("Note Shared with Team!", "success");
-    });
+    // الإرسال لـ Firebase
+    notesRef.push(noteData)
+        .then(() => {
+            noteForm.reset();
+            showToast("Note Added Successfully !", "success");
+        })
+        .catch(() => {
+            showToast("Connection Failed! Please try again ):");
+        });
 });
 
-// --- استلام البيانات Real-time (سحر التيم) ---
+// --- استلام البيانات Real-time ---
 notesRef.on('value', (snapshot) => {
-    // مسح الجداول الحالية
     document.querySelectorAll("tbody").forEach(tb => tb.innerHTML = "");
-
     const data = snapshot.val();
     if (data) {
         Object.keys(data).forEach(id => {
@@ -130,8 +149,9 @@ notesRef.on('value', (snapshot) => {
 document.getElementById("confirmBtn").onclick = () => {
     if (rowToDelete) {
         const id = rowToDelete.getAttribute("data-id");
-        notesRef.child(id).remove();
-        modal.style.display = "none";
+        notesRef.child(id).remove().then(() => {
+            modal.style.display = "none";
+        });
     }
 };
 
@@ -141,28 +161,33 @@ function updateStats() {
     document.getElementById("total-tasks").innerText = allRows.length;
     let pending = 0,
         completed = 0;
+
     allRows.forEach(row => {
         const status = row.querySelector(".status-select").value;
         if (status === "Pending") pending++;
         if (status === "Completed") completed++;
     });
+
     document.getElementById("pending-tasks").innerText = pending;
     document.getElementById("completed-tasks").innerText = completed;
 }
 
-// فتح وإغلاق المودال
-document.querySelectorAll("tbody").forEach(tb => {
-    tb.addEventListener('click', (e) => {
-        if (e.target.classList.contains('delete-btn')) {
-            rowToDelete = e.target.closest('tr');
-            modal.style.display = 'flex';
-        }
-        if (e.target.classList.contains('edit-btn')) {
-            const tr = e.target.closest('tr');
+// أحداث الجدول (Edit & Delete)
+document.querySelectorAll("tbody").forEach(tbody => {
+    tbody.addEventListener("click", (e) => {
+        const tr = e.target.closest("tr");
+        if (!tr) return;
+
+        if (e.target.classList.contains("delete-btn")) {
+            rowToDelete = tr;
+            modal.style.display = "flex";
+        } else if (e.target.classList.contains("edit-btn")) {
             document.getElementById("yourName").value = tr.cells[0].innerText;
             document.getElementById("noteIdea").value = tr.cells[1].innerText;
             document.getElementById("noteDesc").value = tr.cells[2].innerText;
-            // الحذف من Firebase للتعديل (أو يمكنك عمل Update بنفس الـ ID)
+            document.getElementById("noteField").value = tr.parentElement.dataset.field;
+
+            // حذف القديم لعمل تحديث عند الضغط على Add
             notesRef.child(tr.getAttribute("data-id")).remove();
         }
     });
@@ -171,3 +196,8 @@ document.querySelectorAll("tbody").forEach(tb => {
 document.getElementById("cancelBtn").onclick = () => {
     modal.style.display = "none";
 };
+
+// تنظيف أخطاء المدخلات عند الكتابة
+document.querySelectorAll('input, textarea').forEach(el => {
+    el.oninput = () => el.classList.remove("input-error");
+});
