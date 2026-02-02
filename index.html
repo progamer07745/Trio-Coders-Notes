@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Group Notes</title>
+    <link rel="stylesheet" href="style.css" />
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>Trio Coders Notes</h1>
+
+        <form id="noteForm">
+            <div class="stats-container">
+                <div class="stat-item" style="color: #4caf50">
+                    Completed: <span id="completed-tasks">0</span>
+                </div>
+                <div class="stat-item" style="color: #ffc107">
+                    Pending: <span id="pending-tasks">0</span>
+                </div>
+                <div class="stat-item">
+                    Total: <span id="total-tasks">0</span>
+                </div>
+            </div>
+            <div id="form-row">
+                <input type="text" id="yourName" placeholder="Name" />
+                <!-- <span id="nameError" style="color : #ff4d4d; font-size: 12px; position: absolute; top: -20px; right: 0; display: none;">Enter Valid Name!!</span> -->
+                <label for="noteField">Field:</label>
+                <select id="noteField">
+                    <option value="YouTube">YouTube</option>
+                    <option value="Designs">Designs</option>
+                    <option value="Reels">Reels</option>
+                    <option value="Programming">Programming</option>
+                </select>
+            </div>
+            <br />
+            <input type="text" id="noteIdea" placeholder="Idea" />
+            <br />
+            <textarea id="noteDesc" placeholder="Description"></textarea>
+            <button type="submit">ADD</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Idea</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th colspan="2" text-align="center">Status</th>
+                </tr>
+            </thead>
+            <tbody id="table-body-YouTube" data-field="YouTube"></tbody>
+            <tbody id="table-body-Designs" data-field="Designs"></tbody>
+            <tbody id="table-body-Reels" data-field="Reels"></tbody>
+            <tbody id="table-body-Programming" data-field="Programming"></tbody>
+        </table>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Delete Confirmation</h3>
+            <p>Are you sure you want to delete this note?</p>
+            <button id="confirmBtn" class="confirm-btn">Delete</button>
+            <button id="cancelBtn" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- <div id="toast"></div> -->
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

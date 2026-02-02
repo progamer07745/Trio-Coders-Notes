@@ -1,0 +1,493 @@
+/* إعدادات الخط والخلفية الأساسية */
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap");
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0f1113;
+    color: #ffffff;
+    font-family: "Cairo", sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* الحاوية الرئيسية بالإطار المضيء */
+.container {
+    background: #16181b;
+    border: 2px solid #a0c4ff; /* لون الإطار من الصورة */
+    border-radius: 35px;
+    padding: 40px;
+    width: 100%;
+    max-width: 1000px;
+    box-shadow: 0 0 25px rgba(160, 196, 255, 0.15);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+}
+
+/* تنسيق النموذج (Form) */
+#noteForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+label {
+    font-size: 20px;
+}
+
+#form-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+input,
+textarea,
+select {
+    background: #2a2d31;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: white;
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #a0c4ff;
+    background: #32363b;
+}
+
+textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+label {
+    font-weight: bold;
+    color: #a0c4ff;
+}
+
+/* زر ADD الأخضر */
+button[type="submit"] {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+    font-size: 1.1rem;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+button[type="submit"]:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);
+}
+
+/* تنسيق الجدول */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* مسافة بين الصفوف */
+}
+
+th {
+    text-align: left;
+    padding: 15px;
+    color: #a0c4ff;
+    border-bottom: 1px solid rgba(160, 196, 255, 0.2);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+/* تنسيق رؤوس الأقسام (المجالات) داخل الجدول */
+tbody::before {
+    content: attr(data-field);
+    display: table-caption; /* أفضل من block داخل الجدول */
+    caption-side: top;
+    color: #898989;
+    background: rgba(80, 97, 125, 0.05);
+    padding: 8px 15px;
+    font-size: 0.8rem;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: 900;
+    margin-top: 20px;
+    width: fit-content;
+    border: 2px dashed rgba(160, 196, 255, 0.3);
+    border-top: none;
+    border-right: none;
+    border-left: none;
+}
+
+tr {
+    transition: all 0.3s ease;
+}
+
+tr:hover {
+    filter: brightness(1.3);
+    transform: scale(1.01);
+    cursor: pointer;
+}
+
+td {
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+td:first-child {
+    position: relative;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px 0 0 10px;
+}
+
+td:first-child::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 4px;
+    background: var(--row-color, #a0c4ff);
+    border-radius: 10px 0 0 10px;
+    opacity: 0.5;
+    box-shadow: 2px 0 10px var(--row-color, #a0c4ff);
+}
+
+td:last-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0 10px 10px 0;
+}
+
+/* تنسيق خلية الوصف الأساسي */
+td:nth-child(3) {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+}
+
+/* التأثير عند الوقوف بالماوس */
+td:nth-child(3):hover {
+    white-space: normal; /* السماح بتعدد الأسطر */
+    max-width: 600px; /* كبر العرض شوية صغيرين لو محتاج */
+    background: rgba(42, 45, 49, 0.9);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    padding: 15px; /* زيادة الحشو عشان الكلام ميبقاش ملزق */
+    border-radius: 8px;
+    z-index: 100; /* عشان يظهر فوق الصفوف اللي تحته */
+    transform: scale(1.05); /* زووم بسيط جداً بيدي إحساس بالنعومة */
+}
+
+/* أزرار الجدول */
+.edit-btn,
+.delete-btn {
+    padding: 6px 15px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 0 2px;
+    transition: 0.2s;
+}
+
+.edit-btn {
+    background: #43a047;
+    color: white;
+}
+.delete-btn {
+    background: #e53935;
+    color: white;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+    opacity: 0.8;
+}
+
+/* تأثير عند إضافة صف جديد */
+.new-row {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* تخصيص شكل الـ Select داخل الجدول */
+
+.status-select {
+    background: #1a1c1e;
+    padding: 5px;
+    font-size: 0.85rem;
+    border-radius: 5px;
+}
+
+/* منع الـ Text Selection على الأزرار */
+button,
+select {
+    user-select: none;
+}
+
+/* تحسين الـ Scrollbar (للمتصفحات مثل Chrome) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0f1113;
+}
+::-webkit-scrollbar-thumb {
+    background: #2a2d31;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a0c4ff;
+}
+
+/* تأثير نبض بسيط (Pulse) للـ Before في حالة الـ Pending */
+/* تأثير النبض */
+@keyframes pulse {
+    0% {
+        opacity: 0.5;
+        box-shadow: 2px 0 5px var(--row-color);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 2px 0 15px var(--row-color);
+    }
+    100% {
+        opacity: 0.5;
+        box-shadow: 2px 0 5px var(--row-color);
+    }
+}
+
+/* استهداف أي صف لونه أصفر (Pending) */
+/* بنعرفه عن طريق المتغير اللي بعتناه من الـ JS */
+tr[style*="--row-color: #ffc107"] td:first-child::before {
+    animation: pulse 2s infinite ease-in-out;
+}
+
+/* كلاس بنضيفه بالـ JS لحظة المسح */
+.removing-row {
+    opacity: 0;
+    transform: scale(0.95) translateX(20px);
+    transition: all 0.4s ease;
+}
+
+.removing-row {
+    animation: fadeOut 0.4s forwards;
+    pointer-events: none; /* منع أي تفاعل مع الصف أثناء حذفه */
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translateX(20px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100px);
+        /* الحيلة هنا هي جعل الـ display مخفي في النهاية */
+        display: none;
+        height: 0;
+        padding: 0;
+        margin: 0;
+    }
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #16181b;
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid #e53935; /* لون أحمر للتنبيه */
+    text-align: center;
+    box-shadow: 0 0 20px rgba(229, 57, 53, 0.2);
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.confirm-btn {
+    background: #e53935;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.cancel-btn {
+    background: #2a2d31;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.confirm-btn:hover {
+    filter: brightness(1.2);
+}
+
+/* كلاس الخطأ */
+.input-error {
+    border-color: #ff4d4d !important;
+    box-shadow: 0 0 15px rgba(255, 77, 77, 0.5) !important;
+    animation: shake 0.4s ease-in-out;
+}
+
+/* أنميشن الاهتزاز */
+@keyframes shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-8px);
+    }
+    50% {
+        transform: translateX(8px);
+    }
+    75% {
+        transform: translateX(-8px);
+    }
+}
+.stats-container {
+    display: flex;
+    justify-content: space-around;
+    background: #1a1c1e;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(160, 196, 255, 0.1);
+}
+
+.stat-item {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #a0c4ff;
+}
+
+.stat-item span {
+    font-size: 1.3rem;
+    margin-left: 5px;
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #1a1a1a;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    padding: 20px 30px;
+    min-width: 200px;
+    border-radius: 8px;
+
+    border-left: 5px solid #ff0000;
+
+    box-shadow: -5px 0 15px rgba(255, 0, 0, 0.4), 0 4px 15px rgba(0, 0, 0, 0.5);
+
+    color: #fff;
+    font-weight: bold;
+    z-index: 9999;
+    animation: slideIn 0.5s ease-in;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+
+.toast.hide {
+    animation: slideOut 0.5s ease-out forwards;
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0%);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+
+.toast.success {
+    border-left-color: #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2), 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.toast.error {
+    border-left-color: #ff0000;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2), 0 0 15px rgba(0, 0, 0, 0.5);
+}
