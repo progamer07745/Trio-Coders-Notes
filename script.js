@@ -53,6 +53,7 @@ window.handleLogin = () => {
     const email = document.getElementById("emailInput").value.trim();
     const pass = document.getElementById("passInput").value.trim();
     const rememberMe = document.getElementById("rememberMeCheckbox").checked; // بنشوفه معلم عليه ولا لا
+    localStorage.setItem('isRemembered', rememberMe); // بنسجل هو اختار إيه
 
     loginBtn.disabled = true;
     loginBtn.innerHTML = '<span class="spinner"></span> Loading...';
@@ -84,6 +85,7 @@ window.handleLogout = () => {
 
         // دي أهم حتة: بنجبره ينسى الجلسة تماماً
         location.reload(); // ريفرش بسيط يضمن إن كل الـ States اتصفرت
+        localStorage.removeItem('isRemembered');
     });
 };
 
@@ -92,38 +94,50 @@ window.handleLogout = () => {
 // ==========================================
 
 function requestNotificationPermission() {
-    if ("Notification" in window) {
-        Notification.requestPermission();
+    if (!("Notification" in window)) {
+        console.log("This browser does not support desktop notification");
+        return;
     }
+
+    Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+            console.log("Notification permission granted.");
+            // هنا ممكن نربط الـ FCM Token لو حبيت قدام
+        }
+    });
 }
 
 // مراقب الإضافات الجديدة
 // مراقب الإضافات الجديدة
 notesRef.limitToLast(1).on('child_added', (snapshot) => {
-    // إحنا مش عاوزين إشعار ولا صوت أول ما نفتح الموقع (عشان الداتا القديمة)
     if (isInitialLoad) return;
 
     const note = snapshot.val();
     const currentUser = auth.currentUser;
 
-    // الإشعار يشتغل فقط لو حد تاني هو اللي ضاف
+    // الإشعار يوصل للكل ما عدا اللي ضاف النوتة
     if (currentUser && note.createdBy !== currentUser.email) {
-
-        // 1. تشغيل الصوت (تم تغيير الرابط لواحد أسرع)
+        
+        // 1. صوت التنبيه
         const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        notificationSound.play().catch(error => {
-            console.log("الارتباط بالصوت محتاج دوسة منك في الصفحة الأول:", error);
-        });
+        notificationSound.play().catch(() => {});
 
-        // 2. إشعار الـ Toast (بتاعك الشيك)
+        // 2. إشعار الـ Toast الداخلي (الشيك اللي في الموقع)
         showToast(`🔔 ${note.Name} added a new note!`, "success");
 
-        // 3. إشعار المتصفح
+        // 3. إشعار النظام (System Notification) - ده اللي بيظهر حتى لو المتصفح في الخلفية
         if (Notification.permission === "granted") {
-            new Notification("Trio Notes", {
-                body: `${note.Name} added: ${note.Title}`,
-                icon: "https://cdn-icons-png.flaticon.com/512/1048/1048953.png"
+            const systemNote = new Notification("Trio Notes Update", {
+                body: `${note.Name} shared: ${note.Title}`,
+                icon: "https://cdn-icons-png.flaticon.com/512/1048/1048953.png",
+                silent: true // عشان إحنا مشغلين صوتنا الخاص
             });
+
+            // لما يدوس على الإشعار يفتح الموقع
+            systemNote.onclick = () => {
+                window.focus();
+                systemNote.close();
+            };
         }
     }
 });
@@ -282,35 +296,44 @@ function updateStats() {
 // 6. نظام الخروج التلقائي (Auto Logout)
 // ==========================================
 
+// ==========================================
+// 6. نظام الخروج التلقائي الذكي (Smart Auto Logout)
+// ==========================================
+
 let idleTimer;
-const INACTIVITY_TIME = 5 * 60 * 1000; // المدة بالملي ثانية (30 دقيقة)
+const INACTIVITY_TIME = 5 * 60 * 1000; // 30 دقيقة
 
 function resetIdleTimer() {
-    // لو المستخدم عمل أي حركة، بنصفر التايمر ونبدأ نعد من جديد
     clearTimeout(idleTimer);
-
-    // بنبدأ التايمر لو المستخدم مسجل دخول بس
-    if (auth.currentUser) {
+    
+    // بنجيب حالة الـ Remember Me من الـ Checkbox
+    // ملحوظة: لو عاوزها تكون أدق، ممكن تخزن الحالة دي في الـ localStorage عند اللوجن
+const rememberMe = localStorage.getItem('isRemembered') === 'true';
+    // الخروج التلقائي يشتغل فقط لو:
+    // 1. المستخدم مسجل دخول فعلاً
+    // 2. وخيار Remember Me "غير" مفعل
+    if (auth.currentUser && !rememberMe) {
         idleTimer = setTimeout(() => {
-            showToast("Logged out due to inactivity", "error");
-            handleLogout();
+            // التأكد أن المستخدم لم يقم بالنشاط فعلاً قبل الخروج
+            if (typeof window.handleLogout === "function") {
+                showToast("Logged out due to inactivity", "error");
+                window.handleLogout(); 
+            }
         }, INACTIVITY_TIME);
     }
 }
 
-// الأحداث اللي بنعتبرها "نشاط" من المستخدم
-window.onload = resetIdleTimer;
+// الأحداث اللي بتصفر العداد
 window.onmousemove = resetIdleTimer;
-window.onmousedown = resetIdleTimer; // ضغطة ماوس
-window.ontouchstart = resetIdleTimer; // لمس الشاشة للموبايل
+window.onmousedown = resetIdleTimer;
+window.onkeydown = resetIdleTimer;
 window.onclick = resetIdleTimer;
-window.onkeydown = resetIdleTimer; // كتابة بالكيبورد
 
-// تنظيف التايمر تماماً لو خرج يدوي
+// التأكد من الحالة عند تغيير حالة الـ Auth
 auth.onAuthStateChanged((user) => {
-    if (!user) {
-        clearTimeout(idleTimer);
-    } else {
+    if (user) {
         resetIdleTimer();
+    } else {
+        clearTimeout(idleTimer);
     }
 });
