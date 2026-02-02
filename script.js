@@ -52,26 +52,26 @@ window.handleLogin = () => {
     const loginBtn = document.querySelector("#loginSection button");
     const email = document.getElementById("emailInput").value.trim();
     const pass = document.getElementById("passInput").value.trim();
+    const rememberMe = document.getElementById("rememberMeCheckbox").checked; // بنشوفه معلم عليه ولا لا
 
-    // 1. تفعيل حالة التحميل
     loginBtn.disabled = true;
     loginBtn.innerHTML = '<span class="spinner"></span> Loading...';
-    loginBtn.style.opacity = "0.7";
-    loginBtn.style.cursor = "not-allowed";
 
-    auth.signInWithEmailAndPassword(email, pass)
+    // تحديد مدة الجلسة بناءً على اختيار المستخدم
+    // SESSION يمسح الدخول لو قفل المتصفح | LOCAL يفضل فاكره حتى لو قفل الجهاز
+    const persistence = rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
+
+    auth.setPersistence(persistence)
+        .then(() => {
+            return auth.signInWithEmailAndPassword(email, pass);
+        })
         .then(() => {
             showToast("Welcome Back! ✅", "success");
-            // هنا مش محتاجين نرجع الزرار لأصله لأن الصفحة هتختفي أصلاً
         })
         .catch(err => {
-            showToast("Login Failed: " + err.message, "error");
-
-            // 2. إعادة الزرار لأصله في حالة الخطأ عشان يحاول تاني
+            showToast("Error: " + err.message, "error");
             loginBtn.disabled = false;
             loginBtn.innerHTML = "Login";
-            loginBtn.style.opacity = "1";
-            loginBtn.style.cursor = "pointer";
         });
 };
 
@@ -95,24 +95,30 @@ function requestNotificationPermission() {
 }
 
 // مراقب الإضافات الجديدة
+// مراقب الإضافات الجديدة
 notesRef.limitToLast(1).on('child_added', (snapshot) => {
+    // إحنا مش عاوزين إشعار ولا صوت أول ما نفتح الموقع (عشان الداتا القديمة)
     if (isInitialLoad) return;
 
     const note = snapshot.val();
     const currentUser = auth.currentUser;
 
-    // إرسال إشعار فقط لو اللي ضاف النوتة شخص آخر
+    // الإشعار يشتغل فقط لو حد تاني هو اللي ضاف
     if (currentUser && note.createdBy !== currentUser.email) {
-        // 1. إشعار داخل الموقع (Toast)
-        showToast(`🔔 ${note.Name} added: ${note.Title}`, "success");
+        
+        // 1. تشغيل الصوت (تم تغيير الرابط لواحد أسرع)
+        const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        notificationSound.play().catch(error => {
+            console.log("الارتباط بالصوت محتاج دوسة منك في الصفحة الأول:", error);
+        });
 
-        // 2. صوت تنبيه
-        new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3').play().catch(() => {});
+        // 2. إشعار الـ Toast (بتاعك الشيك)
+        showToast(`🔔 ${note.Name} added a new note!`, "success");
 
-        // 3. إشعار المتصفح (Desktop Notification)
+        // 3. إشعار المتصفح
         if (Notification.permission === "granted") {
-            new Notification("Trio Notes Update", {
-                body: `${note.Name} added a new note in ${note.Field}`,
+            new Notification("Trio Notes", {
+                body: `${note.Name} added: ${note.Title}`,
                 icon: "https://cdn-icons-png.flaticon.com/512/1048/1048953.png"
             });
         }
@@ -143,12 +149,15 @@ function renderRow(id, note) {
     if (!tbody) return;
 
     const row = document.createElement("tr");
+    row.classList.add("new-row"); // ده الكلاس اللي فيه الـ fadeIn في الـ CSS بتاعك
+
     const colors = {
         "Pending": "#ffc107",
         "In Progress": "#2196f3",
         "Completed": "#4caf50"
     };
     row.style.setProperty("--row-color", colors[note.progress] || "#ffc107");
+    row.id = id; // مهم جداً عشان نعرف نمسحه بالـ ID بتاعه
 
     row.innerHTML = `
         <td>${note.Name}</td>
@@ -169,7 +178,6 @@ function renderRow(id, note) {
     `;
     tbody.appendChild(row);
 }
-
 document.getElementById("noteForm").addEventListener("submit", function (e) {
     e.preventDefault();
     const nameInput = document.getElementById("yourName");
@@ -206,7 +214,18 @@ window.updateStatus = (id, val) => notesRef.child(id).update({
 
 window.openDelete = (id) => {
     if (confirm("Are you sure?")) {
-        notesRef.child(id).remove().then(() => showToast("Deleted", "success"));
+        const row = document.getElementById(id); // بنجيب الصف اللي عاوزين نمسحه
+        if (row) {
+            row.classList.add("removing-row"); // بنشغل الـ fadeOut اللي في الـ CSS
+
+            // بنستنى 400ms (نفس وقت الـ Animation) وبعدين نمسح من الداتابيز
+            setTimeout(() => {
+                notesRef.child(id).remove().then(() => showToast("Deleted successfully", "success"));
+            }, 400);
+        } else {
+            // لو الصف مش موجود في الـ DOM لسبب ما، امسحه من الداتابيز علطول
+            notesRef.child(id).remove();
+        }
     }
 };
 
