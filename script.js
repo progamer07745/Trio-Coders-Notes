@@ -24,10 +24,10 @@ let isInitialLoad = true;
 // ==========================================
 // 2. إدارة الأمان والدخول (Auth)
 // ==========================================
-
 auth.onAuthStateChanged((user) => {
     const loginSection = document.getElementById("loginSection");
     const mainDashboard = document.getElementById("mainDashboard");
+    const loginBtn = document.querySelector("#loginSection button");
 
     if (user) {
         if (loginSection) loginSection.style.display = "none";
@@ -37,6 +37,14 @@ auth.onAuthStateChanged((user) => {
     } else {
         if (loginSection) loginSection.style.display = "block";
         if (mainDashboard) mainDashboard.style.display = "none";
+
+        // رجع الزرار لأصله فوراً لما تخرج
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = "Login";
+            loginBtn.style.opacity = "1";
+            loginBtn.style.cursor = "pointer";
+        }
     }
 });
 
@@ -68,7 +76,12 @@ window.handleLogin = () => {
 };
 
 window.handleLogout = () => {
-    auth.signOut().then(() => showToast("Logged Out", "success"));
+    auth.signOut().then(() => {
+        showToast("Logged Out", "success");
+        // ممكن تمسح الفورم كمان بالمرة عشان الخصوصية
+        document.getElementById("emailInput").value = "";
+        document.getElementById("passInput").value = "";
+    });
 };
 
 // ==========================================
